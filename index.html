@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForenToxi — Forensic Toxicology</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1318;
+    --surface2: #111820;
+    --border: #1e2d3a;
+    --accent: #00e5ff;
+    --accent2: #ff3d5a;
+    --accent3: #39ff85;
+    --text: #c8d8e0;
+    --text-dim: #5a7a8a;
+    --heading: #e8f4f8;
+    --gold: #c8a84b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Georgia, serif; font-size: 18px; line-height: 1.7; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 3rem; height: 64px; background: rgba(8,12,16,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 20px rgba(0,229,255,0.4); }
+  .nav-logo span { color: var(--accent2); }
+  nav ul { list-style: none; display: flex; gap: 2rem; }
+  nav ul a { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.2s; position: relative; }
+  nav ul a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--accent); transform: scaleX(0); transition: transform 0.2s; }
+  nav ul a:hover { color: var(--accent); }
+  nav ul a:hover::after { transform: scaleX(1); }
+  .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; padding: 0 6rem; }
+  .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 80% 50%, rgba(0,229,255,0.06) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 10% 80%, rgba(255,61,90,0.05) 0%, transparent 60%), radial-gradient(ellipse 30% 40% at 50% 10%, rgba(57,255,133,0.04) 0%, transparent 50%); }
+  .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%); }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; }
+  .hero-tag { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; border: 1px solid rgba(0,229,255,0.3); display: inline-block; padding: 6px 16px; margin-bottom: 2rem; animation: fadeUp 0.8s ease both; }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(5rem, 12vw, 10rem); line-height: 0.9; letter-spacing: 2px; color: var(--heading); animation: fadeUp 0.8s 0.1s ease both; }
+  .hero h1 em { font-style: normal; color: var(--accent); text-shadow: 0 0 40px rgba(0,229,255,0.4); }
+  .hero-sub { font-size: 1.3rem; color: var(--text-dim); max-width: 580px; margin: 2rem 0 3rem; font-style: italic; animation: fadeUp 0.8s 0.2s ease both; }
+  .hero-stats { display: flex; gap: 3rem; animation: fadeUp 0.8s 0.3s ease both; }
+  .stat { border-left: 2px solid var(--accent2); padding-left: 1rem; }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: var(--heading); line-height: 1; }
+  .stat-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes scanline { from { top: -2px; } to { top: 100%; } }
+  section { padding: 6rem 6rem; }
+  section:nth-child(even) { background: var(--surface); }
+  .section-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 12px; }
+  .section-label::before { content: ''; width: 30px; height: 1px; background: var(--accent); }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); color: var(--heading); line-height: 1; margin-bottom: 1rem; }
+  .section-desc { font-size: 1.1rem; color: var(--text-dim); max-width: 700px; margin-bottom: 3rem; font-style: italic; }
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5px; background: var(--border); border: 1px solid var(--border); }
+  .overview-card { background: var(--bg); padding: 2.5rem; position: relative; overflow: hidden; transition: background 0.3s; }
+  .overview-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 0; background: var(--accent); transition: height 0.4s; }
+  .overview-card:hover { background: var(--surface2); }
+  .overview-card:hover::before { height: 100%; }
+  .card-icon { font-size: 2rem; margin-bottom: 1.2rem; display: block; }
+  .card-title { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; }
+  .card-body { color: var(--text); font-size: 1rem; line-height: 1.7; }
+  .branches-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; align-items: start; }
+  .branch-nav { position: sticky; top: 80px; }
+  .branch-item { padding: 1rem 1.5rem; border-left: 2px solid var(--border); cursor: pointer; transition: all 0.2s; margin-bottom: 0.5rem; }
+  .branch-item:hover, .branch-item.active { border-left-color: var(--accent); background: rgba(0,229,255,0.04); }
+  .branch-item-title { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--heading); }
+  .branch-item-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 0.2rem; }
+  .branch-content { display: none; }
+  .branch-content.active { display: block; }
+  .branch-detail { background: var(--surface2); border: 1px solid var(--border); padding: 2.5rem; position: relative; }
+  .branch-detail::after { content: ''; position: absolute; top: 0; right: 0; width: 80px; height: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+  .branch-detail h3 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: var(--heading); margin-bottom: 1rem; }
+  .branch-detail p { color: var(--text); margin-bottom: 1.2rem; line-height: 1.8; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+  .tag { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 1px; padding: 4px 12px; border: 1px solid; text-transform: uppercase; }
+  .tag-cyan { border-color: var(--accent); color: var(--accent); }
+  .tag-red { border-color: var(--accent2); color: var(--accent2); }
+  .tag-green { border-color: var(--accent3); color: var(--accent3); }
+  .tag-gold { border-color: var(--gold); color: var(--gold); }
+  .poison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1rem; }
+  .poison-card { border: 1px solid var(--border); padding: 2rem; position: relative; overflow: hidden; transition: border-color 0.3s; }
+  .poison-card:hover { border-color: var(--accent2); }
+  .poison-class { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; color: var(--accent2); margin-bottom: 0.5rem; }
+  .poison-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--heading); margin-bottom: 0.8rem; }
+  .poison-body { font-size: 0.95rem; color: var(--text); line-height: 1.7; }
+  .poison-data { margin-top: 1.2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .poison-datum { background: var(--surface2); padding: 0.6rem 0.8rem; }
+  .pd-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
+  .pd-val { font-size: 0.9rem; color: var(--accent); margin-top: 0.2rem; }
+  .organs-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .organ-card { background: var(--bg); padding: 2.5rem; position: relative; overflow: hidden; }
+  .organ-card::before { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent2), transparent); transform: scaleX(0); transform-origin: left; transition: transform 0.4s; }
+  .organ-card:hover::before { transform: scaleX(1); }
+  .organ-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .organ-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--heading); margin-bottom: 0.5rem; }
+  .organ-sci { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 1rem; font-style: italic; }
+  .organ-body { font-size: 0.95rem; color: var(--text); line-height: 1.7; }
+  .organ-findings { margin-top: 1.2rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+  .organ-findings h5 { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 2px; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.6rem; }
+  .organ-findings ul { list-style: none; font-size: 0.9rem; color: var(--text-dim); }
+  .organ-findings ul li::before { content: '-> '; color: var(--accent); }
+  .equipment-timeline { position: relative; padding-left: 3rem; }
+  .equipment-timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3)); }
+  .equip-item { position: relative; margin-bottom: 3rem; padding: 2rem; background: var(--surface2); border: 1px solid var(--border); border-left: none; transition: border-color 0.3s; }
+  .equip-item:hover { border-color: var(--accent); }
+  .equip-item::before { content: ''; position: absolute; left: -1.5rem; top: 2rem; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 12px rgba(0,229,255,0.6); }
+  .equip-cat { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.4rem; }
+  .equip-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--heading); margin-bottom: 0.8rem; }
+  .equip-body { color: var(--text); line-height: 1.7; margin-bottom: 1rem; }
+  .equip-specs { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .spec-pill { background: rgba(0,229,255,0.07); border: 1px solid rgba(0,229,255,0.2); color: var(--accent); font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 1px; padding: 4px 12px; }
+  .cases-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; }
+  .case-card { border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .case-header { padding: 2rem; background: var(--surface2); border-bottom: 1px solid var(--border); position: relative; }
+  .case-number { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(0,229,255,0.08); position: absolute; top: -0.5rem; right: 1rem; line-height: 1; pointer-events: none; }
+  .case-status { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .status-closed { color: var(--accent3); }
+  .status-landmark { color: var(--gold); }
+  .status-cold { color: var(--accent); }
+  .case-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--heading); line-height: 1.1; }
+  .case-meta { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--text-dim); margin-top: 0.5rem; }
+  .case-body { padding: 2rem; }
+  .case-body p { font-size: 0.95rem; color: var(--text); line-height: 1.7; margin-bottom: 1rem; }
+  .case-findings { background: var(--bg); border: 1px solid var(--border); padding: 1.2rem; margin-top: 1rem; }
+  .cf-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 2px; color: var(--accent2); text-transform: uppercase; margin-bottom: 0.6rem; }
+  .cf-item { display: flex; gap: 0.5rem; font-size: 0.9rem; color: var(--text-dim); margin-bottom: 0.3rem; }
+  .cf-item::before { content: 'X'; color: var(--accent2); font-size: 0.5rem; margin-top: 5px; }
+  .methods-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); }
+  .method-card { background: var(--bg); padding: 2.5rem; position: relative; }
+  .method-step { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(0,229,255,0.05); position: absolute; top: 0; right: 1rem; line-height: 1; }
+  .method-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--heading); margin-bottom: 0.8rem; }
+  .method-body { font-size: 0.95rem; color: var(--text); line-height: 1.7; }
+  .chain-flow { display: flex; flex-direction: column; gap: 0; position: relative; }
+  .chain-step { display: grid; grid-template-columns: 80px 1fr; gap: 2rem; align-items: start; }
+  .chain-num-wrap { display: flex; flex-direction: column; align-items: center; }
+  .chain-num { width: 56px; height: 56px; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); flex-shrink: 0; }
+  .chain-line { width: 2px; flex: 1; min-height: 40px; background: linear-gradient(to bottom, var(--accent), transparent); margin-top: 4px; }
+  .chain-content { padding: 0 0 3rem; }
+  .chain-content h4 { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--heading); margin-bottom: 0.5rem; }
+  .chain-content p { font-size: 0.95rem; color: var(--text); line-height: 1.7; }
+  .intro-banner { background: var(--surface2); border: 1px solid var(--border); padding: 2rem 3rem; display: flex; align-items: center; gap: 2rem; margin-bottom: 4rem; position: relative; overflow: hidden; }
+  .intro-banner::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: linear-gradient(to bottom, var(--accent), var(--accent2)); }
+  .ib-icon { font-size: 2.5rem; }
+  .ib-text h3 { font-family: 'Space Mono', monospace; font-size: 0.75rem; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 0.3rem; }
+  .ib-text p { font-size: 1rem; color: var(--text); }
+  footer { background: var(--surface); border-top: 1px solid var(--border); padding: 4rem 6rem 2rem; }
+  .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 4px; color: var(--accent); margin-bottom: 1rem; }
+  .footer-logo span { color: var(--accent2); }
+  .footer-desc { font-size: 0.95rem; color: var(--text-dim); line-height: 1.7; }
+  .footer-col h5 { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; }
+  .footer-col a { display: block; font-size: 0.95rem; color: var(--text-dim); text-decoration: none; margin-bottom: 0.5rem; transition: color 0.2s; }
+  .footer-col a:hover { color: var(--text); }
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; }
+  .footer-bottom p { font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 1px; color: var(--text-dim); }
+  @media (max-width: 1024px) { section { padding: 4rem 3rem; } .hero { padding: 0 3rem; } .branches-layout { grid-template-columns: 1fr; } .organs-layout { grid-template-columns: repeat(2, 1fr); } .methods-grid { grid-template-columns: 1fr; } .footer-top { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 768px) { nav { padding: 0 1.5rem; } nav ul { display: none; } section { padding: 3rem 1.5rem; } .hero { padding: 0 1.5rem; } .hero-stats { flex-wrap: wrap; gap: 1.5rem; } .organs-layout { grid-template-columns: 1fr; } .cases-grid { grid-template-columns: 1fr; } .footer-top { grid-template-columns: 1fr; } footer { padding: 3rem 1.5rem 1.5rem; } }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">Foren<span>Toxi</span></div>
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#toxicology">Toxicology</a></li>
+    <li><a href="#poisons">Poisons</a></li>
+    <li><a href="#organs">Organs</a></li>
+    <li><a href="#equipment">Equipment</a></li>
+    <li><a href="#cases">Cases</a></li>
+    <li><a href="#methods">Methods</a></li>
+  </ul>
+</nav>
+
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Forensic Toxicology Reference Platform</div>
+    <h1>FOREN<br><em>TOXI</em></h1>
+    <p class="hero-sub">The definitive scientific reference for forensic toxicology — where chemistry meets justice, and molecules tell the story the deceased cannot.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">200+</div><div class="stat-label">Toxic Compounds</div></div>
+      <div class="stat"><div class="stat-num">18</div><div class="stat-label">Organs Studied</div></div>
+      <div class="stat"><div class="stat-num">40+</div><div class="stat-label">Analytical Methods</div></div>
+      <div class="stat"><div class="stat-num">12</div><div class="stat-label">Landmark Cases</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="overview">
+  <div class="section-label">Foundation</div>
+  <div class="section-title">What Is Forensic Toxicology?</div>
+  <p class="section-desc">The scientific discipline at the crossroads of chemistry, biology, pharmacology, and law — tasked with detecting, identifying, and interpreting the effects of toxic substances in biological matrices.</p>
+  <div class="intro-banner">
+    <div class="ib-icon">&#9879;&#65039;</div>
+    <div class="ib-text">
+      <h3>Discipline Definition</h3>
+      <p>Forensic toxicology applies the principles of toxicology to the purposes of law. It determines whether and how a toxic substance contributed to injury, impairment, or death, and provides expert testimony admissible in courts of justice worldwide.</p>
+    </div>
+  </div>
+  <div class="overview-grid">
+    <div class="overview-card">
+      <span class="card-icon">&#128300;</span>
+      <div class="card-title">Postmortem Toxicology</div>
+      <p class="card-body">Analyzes biological specimens from deceased individuals to detect toxic substances that may have caused or contributed to death. Involves blood, urine, vitreous humor, liver, hair, and bone marrow analysis to reconstruct the timeline and concentration of exposure. The forensic toxicologist must interpret findings in the context of post-mortem redistribution, decomposition, and all available investigative information.</p>
+    </div>
+    <div class="overview-card">
+      <span class="card-icon">&#128663;</span>
+      <div class="card-title">Human Performance Toxicology</div>
+      <p class="card-body">Evaluates how substances — alcohol, drugs, medications — impair cognitive and motor function. Applied in DUI/DWI cases, workplace accidents, and aviation incidents. Establishes pharmacokinetic models to determine the degree of impairment at a specific time. Breath, blood, and urine analysis combined with standardized field sobriety testing provide the evidential foundation.</p>
+    </div>
+    <div class="overview-card">
+      <span class="card-icon">&#9878;&#65039;</span>
+      <div class="card-title">Forensic Drug Testing</div>
+      <p class="card-body">Screens and confirms the presence of controlled substances in biological specimens for employment, probation, and criminal justice purposes. Governed by strict chain-of-custody protocols and employs immunoassay screening confirmed by mass spectrometry. SAMHSA-mandated federal workplace testing panels cover five drug classes with defined cutoff concentrations.</p>
+    </div>
+    <div class="overview-card">
+      <span class="card-icon">&#128138;</span>
+      <div class="card-title">Clinical Forensic Toxicology</div>
+      <p class="card-body">Applied in emergency medicine for treating poisoning victims and documenting evidence of drug-facilitated crimes. Works at the intersection of clinical care and legal investigation, ensuring toxicological evidence is preserved while patient wellbeing is prioritized. Toxidrome recognition guides clinical management while meticulous specimen collection preserves forensic integrity.</p>
+    </div>
+    <div class="overview-card">
+      <span class="card-icon">&#127807;</span>
+      <div class="card-title">Environmental Toxicology</div>
+      <p class="card-body">Investigates exposure to environmental toxicants — heavy metals, pesticides, industrial chemicals — in populations or individuals. Used in litigation involving contamination events, occupational disease, and ecosystem damage assessments. Biomarker analysis in hair, blood, and urine documents individual exposure levels against regulatory reference values.</p>
+    </div>
+    <div class="overview-card">
+      <span class="card-icon">&#128137;</span>
+      <div class="card-title">Doping Control</div>
+      <p class="card-body">Detects performance-enhancing substances in athletes through urine and blood analysis. Governed by WADA standards, it employs highly sophisticated LC-MS/MS and GC-MS methodologies to identify nanogram-level concentrations of banned substances and their metabolites. The Athlete Biological Passport program uses longitudinal profiling to detect indirect doping evidence.</p>
+    </div>
+  </div>
+</section>
+
+<section id="toxicology">
+  <div class="section-label">Scientific Domains</div>
+  <div class="section-title">Branches of Toxicology</div>
+  <p class="section-desc">Forensic toxicology draws from multiple specialized disciplines, each contributing unique methodologies and knowledge to the investigation of toxic causation.</p>
+  <div class="branches-layout">
+    <div class="branch-nav">
+      <div class="branch-item active" onclick="showBranch('pharmacokinetics', this)">
+        <div class="branch-item-title">Pharmacokinetics</div>
+        <div class="branch-item-sub">ADME processes</div>
+      </div>
+      <div class="branch-item" onclick="showBranch('pharmacodynamics', this)">
+        <div class="branch-item-title">Pharmacodynamics</div>
+        <div class="branch-item-sub">Mechanism of action</div>
+      </div>
+      <div class="branch-item" onclick="showBranch('analytical', this)">
+        <div class="branch-item-title">Analytical Chemistry</div>
+        <div class="branch-item-sub">Detection and quantification</div>
+      </div>
+      <div class="branch-item" onclick="showBranch('pathology', this)">
+        <div class="branch-item-title">Forensic Pathology</div>
+        <div class="branch-item-sub">Cause of death</div>
+      </div>
+      <div class="branch-item" onclick="showBranch('neurotoxicology', this)">
+        <div class="branch-item-title">Neurotoxicology</div>
+        <div class="branch-item-sub">CNS effects</div>
+      </div>
+      <div class="branch-item" onclick="showBranch('immunotoxicology', this)">
+        <div class="branch-item-title">Immunotoxicology</div>
+        <div class="branch-item-sub">Immune system disruption</div>
+      </div>
+    </div>
+    <div>
+      <div class="branch-content active branch-detail" id="pharmacokinetics">
+        <h3>Pharmacokinetics</h3>
+        <p>Pharmacokinetics is the mathematical study of how the body processes a substance — encompassing Absorption, Distribution, Metabolism, and Excretion (ADME). In forensic toxicology, it is used to back-calculate concentrations at the time of relevant events from post-event measurements, critically important in DUI prosecutions and time-of-death investigations.</p>
+        <p><strong>Absorption</strong> describes the rate and extent a substance enters systemic circulation. Route of administration critically affects this: intravenous delivers 100% bioavailability instantly, while oral absorption is modified by first-pass hepatic metabolism, gastric pH, and motility. Factors including food intake, gastric emptying time, and formulation (immediate vs. extended release) markedly alter absorption kinetics.</p>
+        <p><strong>Distribution</strong> is governed by lipophilicity, plasma protein binding, and tissue affinity. Volume of distribution (Vd) — a mathematical construct representing apparent volume needed to contain all drug at plasma concentration — helps forensic toxicologists interpret blood concentrations. Drugs with large Vd (digoxin, chloroquine) concentrate in tissues and may exhibit low blood concentrations despite significant body burden.</p>
+        <p><strong>Metabolism</strong> primarily occurs in the liver via CYP450 enzymes. Genetic polymorphisms in CYP2D6, CYP2C9, and CYP3A4 create inter-individual variability in metabolic capacity — ultra-rapid metabolizers may clear drugs quickly while poor metabolizers accumulate them at therapeutic doses. This genetic context must be considered when interpreting drug concentrations.</p>
+        <div class="tag-list">
+          <span class="tag tag-cyan">ADME</span><span class="tag tag-cyan">Half-life</span><span class="tag tag-cyan">Vd</span><span class="tag tag-red">CYP450</span><span class="tag tag-green">Bioavailability</span><span class="tag tag-gold">Back-calculation</span>
+        </div>
+      </div>
+      <div class="branch-content branch-detail" id="pharmacodynamics">
+        <h3>Pharmacodynamics</h3>
+        <p>Pharmacodynamics studies the biochemical and physiological effects of substances on the body and their mechanisms of action. For forensic toxicologists, understanding how a drug affects receptor systems allows interpretation of the biological consequences observed at autopsy and helps correlate blood concentrations to clinically observed effects and behavioral impairment.</p>
+        <p><strong>Receptor theory</strong> underlies most drug actions. Opioids bind mu, kappa, and delta receptors causing analgesia and respiratory depression. Benzodiazepines potentiate GABA-A receptor chloride conductance, producing sedation. Cocaine and amphetamines block monoamine reuptake transporters, flooding synapses with dopamine, norepinephrine, and serotonin — producing stimulant toxidrome with hyperthermia, tachycardia, and hypertension.</p>
+        <p><strong>Dose-response relationships</strong> are fundamental: the threshold dose, effective dose (ED50), toxic dose (TD50), and lethal dose (LD50) form the pharmacological toxicity spectrum. Forensic interpretation requires assessing where an observed concentration falls on this continuum, accounting for tolerance development, individual pharmacogenomics, and the presence of interacting substances.</p>
+        <p><strong>Synergism</strong> between substances is the most important concept in modern overdose investigation. CNS depressants — alcohol, opioids, and benzodiazepines — produce supra-additive respiratory depression when combined. This poly-drug interaction is now implicated in over 80% of opioid overdose fatalities and requires comprehensive toxicological screening of all suspected drug deaths.</p>
+        <div class="tag-list">
+          <span class="tag tag-cyan">Receptor Binding</span><span class="tag tag-red">LD50</span><span class="tag tag-green">Synergism</span><span class="tag tag-gold">ED50</span><span class="tag tag-cyan">Antagonism</span>
+        </div>
+      </div>
+      <div class="branch-content branch-detail" id="analytical">
+        <h3>Analytical Chemistry</h3>
+        <p>The technical backbone of forensic toxicology. Analytical chemists develop, validate, and apply methods to detect and quantify drugs, poisons, and metabolites in complex biological matrices — often at concentrations in the nanogram or picogram per milliliter range. Method validation per SWGTOX or ISO 17025 standards is mandatory before any method is applied to casework.</p>
+        <p><strong>Immunoassay screening</strong> (ELISA, EMIT, CLIA) provides rapid qualitative results using antibody-antigen reactions. These are highly sensitive but cross-react with structurally similar compounds, necessitating confirmatory testing. A positive presumptive screen triggers mandatory mass spectrometric confirmation before any legal reporting or action. False positives from cross-reactivity — quetiapine causing false-positive methadone screens, quinolone antibiotics causing false-positive opiates — are well-documented clinical pitfalls.</p>
+        <p><strong>Chromatographic confirmation</strong> using GC-MS, LC-MS/MS, or GC-MS/MS serves as the gold standard. These techniques provide both retention time identification and mass spectral fragmentation patterns — a molecular fingerprint that is effectively unequivocal. Stable isotope-labeled internal standards ensure quantitative accuracy by correcting for matrix effects and extraction variability.</p>
+        <div class="tag-list">
+          <span class="tag tag-cyan">GC-MS</span><span class="tag tag-cyan">LC-MS/MS</span><span class="tag tag-red">ELISA</span><span class="tag tag-green">HRMS</span><span class="tag tag-gold">SPE</span><span class="tag tag-cyan">QTOF</span>
+        </div>
+      </div>
+      <div class="branch-content branch-detail" id="pathology">
+        <h3>Forensic Pathology Interface</h3>
+        <p>Forensic toxicology and forensic pathology are inseparable disciplines. The pathologist determines anatomical cause of death through autopsy findings; the toxicologist determines whether substances played a causative, contributory, or incidental role. Together they construct the complete mechanism and manner of death, which must be defensible in court.</p>
+        <p><strong>Specimen collection at autopsy</strong> is guided by toxicological priorities. Central blood (cardiac) reflects post-mortem redistribution (PMR) — the movement of drugs from tissues into central blood after death, driven by diffusion gradients and decomposition. Peripheral blood (femoral) is the preferred matrix for ante-mortem concentration estimation as it is substantially less affected by PMR. A complete postmortem toxicological panel collects both, plus urine, vitreous humor, liver, and gastric contents.</p>
+        <p><strong>Post-mortem redistribution</strong> is the single greatest interpretive challenge in forensic toxicology. Lipophilic drugs with large volumes of distribution — particularly tricyclic antidepressants, chlorpromazine, and methadone — can exhibit central-to-peripheral blood ratios of 5:1 or greater after death. Awareness of PMR magnitude for specific compounds is essential to avoid catastrophically misinterpreting postmortem concentrations as evidence of acute overdose.</p>
+        <div class="tag-list">
+          <span class="tag tag-red">PMR</span><span class="tag tag-cyan">Peripheral Blood</span><span class="tag tag-green">Vitreous Humor</span><span class="tag tag-gold">Autopsy</span><span class="tag tag-cyan">Cause of Death</span>
+        </div>
+      </div>
+      <div class="branch-content branch-detail" id="neurotoxicology">
+        <h3>Neurotoxicology</h3>
+        <p>Neurotoxicology examines how chemical agents impair or destroy nervous system function — from acute behavioral effects measurable during life to neuropathological changes detectable at autopsy. The nervous system's unique architecture — particularly its high metabolic demands and limited regenerative capacity — makes it especially vulnerable to chemical insult.</p>
+        <p><strong>Organophosphate and carbamate poisoning</strong> inhibits acetylcholinesterase, causing accumulation of acetylcholine at synapses. The resulting cholinergic crisis — SLUDGE syndrome (Salivation, Lacrimation, Urination, Defecation, GI distress, Emesis) plus miosis, bradycardia, bronchospasm, and seizures — is a classic neurotoxicological presentation. RBC cholinesterase activity measurement is the confirmatory biomarker, with depression exceeding 50% of baseline indicating significant toxin exposure.</p>
+        <p><strong>Heavy metal neurotoxicity</strong> includes lead's disruption of calcium-dependent neural processes and heme synthesis, mercury's covalent binding to sulfhydryl groups disrupting mitochondrial function, and manganese's preferential accumulation in basal ganglia producing manganism — a Parkinson-like syndrome seen in welders and miners. Speciated metal analysis in blood and segmented hair documents the chronology of exposure with precision.</p>
+        <div class="tag-list">
+          <span class="tag tag-red">Cholinergic Crisis</span><span class="tag tag-cyan">Heavy Metals</span><span class="tag tag-green">SLUDGE Syndrome</span><span class="tag tag-gold">Excitotoxicity</span>
+        </div>
+      </div>
+      <div class="branch-content branch-detail" id="immunotoxicology">
+        <h3>Immunotoxicology</h3>
+        <p>Immunotoxicology investigates how chemical exposures alter immune system function — through immunosuppression, hypersensitivity reactions, or autoimmune induction. In forensic contexts, it explains deaths from anaphylaxis, chemical-induced aplastic anemia, and immune-mediated organ failure that standard toxicological screening would not identify without targeted biomarker analysis.</p>
+        <p><strong>Drug hypersensitivity reactions</strong> range from mild urticarial eruptions to life-threatening Stevens-Johnson syndrome and toxic epidermal necrolysis (TEN). Serum tryptase — released from mast cell and basophil degranulation during anaphylaxis — serves as a postmortem biomarker, with concentrations exceeding 10 micrograms per liter in postmortem serum strongly supporting anaphylactic death when correlated with clinical history and autopsy findings showing laryngeal edema and eosinophilic tissue infiltration.</p>
+        <p><strong>Chemical-induced immunosuppression</strong> from chlorinated dioxins, benzene, organotins, and immunomodulatory therapeutic drugs increases susceptibility to opportunistic infection. Investigation of immunocompromised individuals who die from unusual infectious agents requires expanded panels including immunophenotyping and cytokine profiling alongside comprehensive toxicological analysis.</p>
+        <div class="tag-list">
+          <span class="tag tag-red">Anaphylaxis</span><span class="tag tag-cyan">Tryptase Biomarker</span><span class="tag tag-green">Hypersensitivity</span><span class="tag tag-gold">Autoimmunity</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="poisons">
+  <div class="section-label">Toxicant Classification</div>
+  <div class="section-title">Poisons and Toxic Agents</div>
+  <p class="section-desc">A comprehensive survey of the major toxicant classes encountered in forensic investigations — their chemistry, mechanisms of toxicity, forensic signatures, and detection strategies.</p>
+  <div class="poison-grid">
+    <div class="poison-card">
+      <div class="poison-class">Cellular Toxins</div>
+      <div class="poison-name">Cyanide</div>
+      <p class="poison-body">Hydrogen cyanide and its salts (KCN, NaCN) inhibit cytochrome c oxidase (Complex IV) in the mitochondrial electron transport chain, halting aerobic respiration. Cells are unable to utilize oxygen despite adequate supply — histotoxic hypoxia. Death occurs within minutes at lethal doses. Sources include combustion products (fires), industrial processes, and certain plants (cassava, apricot pits). Victims of closed-space fires are routinely screened for both COHb and cyanide.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Blood, Gastric</div></div>
+        <div class="poison-datum"><div class="pd-label">Lethal Conc.</div><div class="pd-val">&gt;1 mg/L blood</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">GC-FID, Microdiffusion</div></div>
+        <div class="poison-datum"><div class="pd-label">Autopsy Sign</div><div class="pd-val">Cherry-red lividity</div></div>
+      </div>
+    </div>
+    <div class="poison-card">
+      <div class="poison-class">Heavy Metals</div>
+      <div class="poison-name">Arsenic</div>
+      <p class="poison-body">Inorganic arsenic (arsenite As3+, arsenate As5+) binds sulfhydryl groups on enzymes, disrupting pyruvate dehydrogenase and the Krebs cycle. Chronic exposure produces the classic triad of Mees' lines on nails, peripheral neuropathy, and arsenical keratosis. Hair and nail analysis provides a longitudinal exposure timeline with approximately 1 cm per month hair growth as a temporal marker — a technique that solved the Napoleon Bonaparte historical poisoning case.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Hair, Nail, Urine</div></div>
+        <div class="poison-datum"><div class="pd-label">Toxic Level</div><div class="pd-val">&gt;100 microg/L urine</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">ICP-MS, HG-AAS</div></div>
+        <div class="poison-datum"><div class="pd-label">Classic Sign</div><div class="pd-val">Mees' lines on nails</div></div>
+      </div>
+    </div>
+    <div class="poison-card">
+      <div class="poison-class">Synthetic Opioids</div>
+      <div class="poison-name">Fentanyl and Analogues</div>
+      <p class="poison-body">Synthetic opioids 50 to 10,000 times more potent than morphine. Fentanyl binds mu-opioid receptors causing profound respiratory depression — the primary mechanism of overdose death. Carfentanil (approximately 10,000 times morphine potency) is detectable only at picogram levels requiring HRMS. Post-mortem redistribution is significant; vitreous humor or psoas muscle provide more reliable ante-mortem approximations. The illicit fentanyl epidemic has made this class the leading cause of drug overdose death in North America.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Peripheral Blood</div></div>
+        <div class="poison-datum"><div class="pd-label">Toxic Level</div><div class="pd-val">&gt;3 ng/mL fentanyl</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">LC-MS/MS</div></div>
+        <div class="poison-datum"><div class="pd-label">Antidote</div><div class="pd-val">Naloxone (Narcan)</div></div>
+      </div>
+    </div>
+    <div class="poison-card">
+      <div class="poison-class">Organophosphate Pesticides</div>
+      <div class="poison-name">Organophosphates</div>
+      <p class="poison-body">Compounds such as parathion, malathion, chlorpyrifos, and nerve agents (sarin, VX) irreversibly phosphorylate acetylcholinesterase. The resulting cholinergic toxidrome includes SLUDGE symptoms (muscarinic effects) and fasciculations with seizures (nicotinic effects). Measurement of RBC cholinesterase activity — depressed greater than 50% indicates significant poisoning — and plasma butyrylcholinesterase provides biological confirmation. Atropine blocks muscarinic receptors; pralidoxime (2-PAM) reactivates the enzyme if given before aging occurs.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Gastric, Blood</div></div>
+        <div class="poison-datum"><div class="pd-label">Biomarker</div><div class="pd-val">RBC AChE activity</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">GC-MS, GC-NPD</div></div>
+        <div class="poison-datum"><div class="pd-label">Antidote</div><div class="pd-val">Atropine + 2-PAM</div></div>
+      </div>
+    </div>
+    <div class="poison-card">
+      <div class="poison-class">Asphyxiant Gas</div>
+      <div class="poison-name">Carbon Monoxide</div>
+      <p class="poison-body">CO binds hemoglobin with 240 times greater affinity than oxygen, forming carboxyhemoglobin (COHb) and impairing oxygen delivery to tissues. It also binds myoglobin and cytochrome oxidase. Lethal COHb is typically above 50%, though lower levels are fatal in individuals with cardiovascular disease. Classic autopsy finding is cherry-red skin and blood lividity. COHb is stable postmortem and in decomposed samples — valuable in fire fatality investigations where other evidence is destroyed. Headspace GC or CO-oximetry measures COHb in blood.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Blood (headspace)</div></div>
+        <div class="poison-datum"><div class="pd-label">Lethal Level</div><div class="pd-val">COHb &gt;50%</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">CO-oximetry, GC</div></div>
+        <div class="poison-datum"><div class="pd-label">Autopsy Sign</div><div class="pd-val">Cherry-red blood</div></div>
+      </div>
+    </div>
+    <div class="poison-card">
+      <div class="poison-class">Ethanol</div>
+      <div class="poison-name">Alcohol (Ethanol)</div>
+      <p class="poison-body">The most commonly encountered substance in forensic toxicology. Ethanol is a CNS depressant acting primarily via GABA-A potentiation and NMDA antagonism. Blood alcohol concentration (BAC) correlates with dose-dependent impairment. Postmortem ethanol is complicated by putrefactive neo-formation of ethanol by microbial fermentation of glucose — potentially generating up to 0.3 g/dL in some putrefied specimens. Vitreous humor BAC is the gold standard for postmortem interpretation due to resistance to bacterial synthesis artifacts and delayed equilibration from peripheral blood.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Blood, Vitreous</div></div>
+        <div class="poison-datum"><div class="pd-label">Legal Limit</div><div class="pd-val">0.08 g/dL BAC</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">Headspace GC-FID</div></div>
+        <div class="poison-datum"><div class="pd-label">Lethal Level</div><div class="pd-val">&gt;0.4 g/dL BAC</div></div>
+      </div>
+    </div>
+    <div class="poison-card">
+      <div class="poison-class">Plant Protein Toxins</div>
+      <div class="poison-name">Ricin</div>
+      <p class="poison-body">Ricin, derived from Ricinus communis (castor beans), is a ribosome-inactivating protein that halts protein synthesis by depurinating 28S ribosomal RNA. Lethal by injection at microgram quantities. ELISA and mass spectrometry-based immunoassays detect ricin in biological fluids. The umbrella murder of Georgi Markov in 1978 — a platinum pellet injecting ricin into his thigh — is the defining historical case. Analysis requires BSL-2 or BSL-3 containment facilities due to extreme lethality and bioterrorism classification.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Blood, Urine, Tissue</div></div>
+        <div class="poison-datum"><div class="pd-label">Lethal Dose</div><div class="pd-val">~1-10 microg/kg (inj.)</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">ELISA, LC-MS/MS</div></div>
+        <div class="poison-datum"><div class="pd-label">BSL Level</div><div class="pd-val">BSL-2/3 required</div></div>
+      </div>
+    </div>
+    <div class="poison-card">
+      <div class="poison-class">Anticoagulants</div>
+      <div class="poison-name">Warfarin and Superwarfarins</div>
+      <p class="poison-body">Vitamin K antagonist rodenticides (brodifacoum, bromadiolone) and the therapeutic anticoagulant warfarin inhibit vitamin K epoxide reductase, preventing carboxylation of clotting factors II, VII, IX, and X. Superwarfarins have half-lives of weeks, causing prolonged coagulopathy. Poisoning presents as internal hemorrhage — retroperitoneal, intracranial, pulmonary — with dramatically elevated INR. LC-MS/MS quantifies individual compounds in blood and liver; the liver accumulates superwarfarins at concentrations 100-fold higher than blood.</p>
+      <div class="poison-data">
+        <div class="poison-datum"><div class="pd-label">Detection Matrix</div><div class="pd-val">Blood, Liver</div></div>
+        <div class="poison-datum"><div class="pd-label">Clinical Sign</div><div class="pd-val">INR &gt;10 (supratherap.)</div></div>
+        <div class="poison-datum"><div class="pd-label">Method</div><div class="pd-val">LC-MS/MS</div></div>
+        <div class="poison-datum"><div class="pd-label">Antidote</div><div class="pd-val">Vitamin K1</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="organs">
+  <div class="section-label">Biological Matrices</div>
+  <div class="section-title">Organs and Specimens Studied</div>
+  <p class="section-desc">Each biological matrix offers a unique toxicological window — different detection timeframes, redistribution behaviors, and analytic yields that must be strategically selected by the forensic toxicologist based on case circumstances.</p>
+  <div class="organs-layout">
+    <div class="organ-card">
+      <div class="organ-icon">&#129346;</div>
+      <div class="organ-name">Blood</div>
+      <div class="organ-sci">Sanguis — Primary Forensic Matrix</div>
+      <p class="organ-body">Blood is the primary specimen for quantitative toxicological analysis and the most direct reflection of systemic drug concentrations at a given time. Peripheral (femoral) blood is preferred over central (cardiac) blood due to significantly lower post-mortem redistribution (PMR) artifact. A minimum of 30 mL is collected when possible, preserved with sodium fluoride and potassium oxalate to prevent enzymatic degradation. Blood specimens must be refrigerated promptly and analyzed within established stability windows.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>BAC determination in DUI and traffic fatality investigations</li>
+          <li>Drug concentration estimation at time of death</li>
+          <li>Therapeutic vs. toxic vs. lethal range assessment</li>
+          <li>Heavy metal speciation (lead, mercury, arsenic)</li>
+          <li>COHb measurement in fire and CO poisoning deaths</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#129761;</div>
+      <div class="organ-name">Liver</div>
+      <div class="organ-sci">Hepar — Primary Metabolic Organ</div>
+      <p class="organ-body">The liver is the primary site of drug metabolism and concentrates many lipophilic drugs and metals at levels 10 to 100 times higher than blood. The right lobe is preferred for sampling as it is less subject to PMR from gastric contents. Hepatotoxic compounds produce characteristic histopathological patterns — centrilobular necrosis (acetaminophen), periportal necrosis (phosphorus), and macrovesicular steatosis (ethanol, valproate) — that provide pathological corroboration of toxicological findings. In decomposed cases, liver may be the most viable specimen available.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Detection of hepatotoxins (acetaminophen, aflatoxin)</li>
+          <li>Volatile solvent and inhalant identification</li>
+          <li>Drug metabolite profiling in decomposed cases</li>
+          <li>Heavy metal quantification (arsenic, cadmium, mercury)</li>
+          <li>Superwarfarin anticoagulant accumulation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#128167;</div>
+      <div class="organ-name">Urine</div>
+      <div class="organ-sci">Urina — Extended Detection Window</div>
+      <p class="organ-body">Urine provides a broader detection window than blood (days to weeks for most drugs) and high concentrations of drug metabolites — making it ideal for screening purposes. However, urine concentrations do not reflect impairment or the concentration present at the time of relevant events. It is the primary matrix for workplace drug testing, probation monitoring, and SAMHSA-regulated federal testing programs. Specimen validity testing (temperature, specific gravity, creatinine, pH, oxidizing agents) must verify authenticity to detect adulteration or substitution attempts.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Workplace and probation drug screening programs</li>
+          <li>Drug metabolite detection (THC-COOH, morphine-6-glucuronide)</li>
+          <li>Heavy metal urinary excretion monitoring</li>
+          <li>Performance-enhancing drug testing (WADA programs)</li>
+          <li>Drug-facilitated sexual assault (DFSA) evidence</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#128065;&#65039;</div>
+      <div class="organ-name">Vitreous Humor</div>
+      <div class="organ-sci">Humor Vitreus — Protected Compartment</div>
+      <p class="organ-body">The vitreous humor — the gel-like fluid of the posterior eye chamber — is one of the most valuable forensic specimens due to physical isolation by the blood-ocular barrier. It exhibits minimal PMR, resists decomposition, and in cases of advanced putrefaction may be the only viable specimen available. Ethanol in vitreous lags approximately 1 to 2 hours behind blood due to equilibration kinetics. Potassium concentration in vitreous provides an estimate of postmortem interval when analyzed within the appropriate timeframe and temperature-corrected.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Gold standard postmortem BAC interpretation</li>
+          <li>Drug analysis in decomposed and mummified remains</li>
+          <li>Postmortem interval (PMI) estimation via K+ levels</li>
+          <li>Glucose and electrolyte analysis in sudden death</li>
+          <li>Diabetic ketoacidosis and hypoglycemia documentation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#129408;</div>
+      <div class="organ-name">Heart</div>
+      <div class="organ-sci">Cor — Central Cardiovascular Organ</div>
+      <p class="organ-body">Cardiac blood is collected as a secondary blood specimen and is subject to significant PMR as the heart acts as a reservoir concentrating lipophilic drugs from surrounding lung, liver, and gastric tissues. Pericardial fluid shows less PMR than cardiac blood and serves as a useful supplementary matrix. Cardiac tissue itself is analyzed for cardiotoxins. Drugs with narrow therapeutic indices affecting the cardiac conduction system — digoxin, procainamide, flecainide, tricyclic antidepressants — are particularly relevant in cardiac toxicology investigation of sudden arrhythmic death.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Cardiac glycoside analysis (digoxin toxicity)</li>
+          <li>Antiarrhythmic drug quantification</li>
+          <li>Pericardial fluid as surrogate reference matrix</li>
+          <li>Cocaine-induced cardiomyopathy and arrhythmia</li>
+          <li>QTc-prolonging drug combinations in sudden death</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#129504;</div>
+      <div class="organ-name">Brain</div>
+      <div class="organ-sci">Cerebrum — Primary Neurotoxicity Target</div>
+      <p class="organ-body">Brain tissue analysis is particularly relevant for neurotoxins and highly lipophilic psychoactive substances. The blood-brain barrier selectively concentrates certain substances in brain tissue. The cerebellum is preferred over cortex for sampling due to lower vascularity. Neuropathological examination alongside toxicological analysis identifies toxic leukoencephalopathy (heroin pyrolysate, methanol), hypoxic-ischemic injury from opioid apnea, and specific lesion patterns — methanol causes bilateral putaminal necrosis, MPTP destroys substantia nigra — that are pathognomonic for specific toxicants.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Neurotoxin localization and concentration studies</li>
+          <li>Lipophilic drug confirmation in peripheral blood-negative cases</li>
+          <li>Methanol and ethylene glycol intoxication</li>
+          <li>MPTP and selective neurotoxin exposure investigation</li>
+          <li>Tertiary specimen in advanced decomposition cases</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#129978;</div>
+      <div class="organ-name">Hair</div>
+      <div class="organ-sci">Capillus — Chronological Exposure Archive</div>
+      <p class="organ-body">Hair is unique among forensic matrices in providing a longitudinal record of drug exposure over months to years. Drugs incorporate into hair through passive diffusion from blood during keratinization, sebum and sweat deposition, and external contamination. Segmental analysis (approximately 1 cm equals approximately 1 month) creates a drug use timeline invaluable in chronic poisoning, child custody, and historical investigation cases. Dark hair incorporates basic drugs more extensively due to melanin binding — a systematic bias requiring interpretation adjustment in comparative studies. Decontamination wash procedures distinguish systemic from external contamination.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Chronic arsenic and heavy metal exposure timeline construction</li>
+          <li>Historical drug use documentation in living subjects</li>
+          <li>Drug-facilitated crime cases months after the event</li>
+          <li>Child abuse drug exposure documentation (neonatal hair)</li>
+          <li>Doping control retrospective profiling programs</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#129759;</div>
+      <div class="organ-name">Kidney</div>
+      <div class="organ-sci">Renes — Excretory and Filtration Organ</div>
+      <p class="organ-body">The kidneys filter approximately 180 liters of blood daily and concentrate substances during urinary formation. Renal tubular cells are particularly vulnerable to nephrotoxins — cisplatin, aminoglycosides, ethylene glycol metabolites (calcium oxalate crystals in tubules), and heavy metals (cadmium causing Fanconi syndrome, mercury causing proximal tubular necrosis). Kidney tissue analysis is especially valuable when urine is unavailable at autopsy. The presence of oxalate crystals on histology viewed under polarized light is pathognomonic for ethylene glycol poisoning and corroborates toxicological findings.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Ethylene glycol poisoning (calcium oxalate crystal identification)</li>
+          <li>Nephrotoxic metal accumulation (Cd, Pb, Hg)</li>
+          <li>Drug analysis when bladder urine unavailable</li>
+          <li>Mercury nephrotoxicity pattern documentation</li>
+          <li>Myoglobin-induced tubular injury (rhabdomyolysis cases)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="organ-card">
+      <div class="organ-icon">&#129752;</div>
+      <div class="organ-name">Lung</div>
+      <div class="organ-sci">Pulmo — Inhalation Target Organ</div>
+      <p class="organ-body">Lung tissue is the primary target organ for inhaled toxicants and is analyzed in suspected poisonings involving volatile substances, inhaled anesthetics, and respiratory irritants. Inhalant abuse (huffing petroleum distillates, toluene, chlorinated solvents) is detected by headspace GC-FID identifying specific volatile compounds at the point of first-pass absorption. Pulmonary edema fluid may contain higher drug concentrations than blood in certain overdose scenarios. Pneumoconiosis patterns from occupational dust — silicosis, asbestosis, coal workers' pneumoconiosis — are quantified by environmental scanning electron microscopy for litigation support.</p>
+      <div class="organ-findings">
+        <h5>Key Forensic Applications</h5>
+        <ul>
+          <li>Volatile substance and inhalant abuse identification</li>
+          <li>Inhaled anesthetic detection in suspicious anesthesia deaths</li>
+          <li>Pulmonary edema fluid drug analysis</li>
+          <li>Asbestos fiber quantification for mesothelioma litigation</li>
+          <li>Smoke inhalation and fire fatality investigation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="equipment">
+  <div class="section-label">Instrumentation</div>
+  <div class="section-title">Laboratory Equipment</div>
+  <p class="section-desc">State-of-the-art analytical instruments that transform biological specimens into legally admissible toxicological evidence — each validated to rigorous forensic quality assurance standards.</p>
+  <div class="equipment-timeline">
+    <div class="equip-item">
+      <div class="equip-cat">Chromatography — Mass Spectrometry</div>
+      <div class="equip-name">Gas Chromatograph-Mass Spectrometer (GC-MS)</div>
+      <p class="equip-body">The historical gold standard of forensic toxicology confirmation. The GC separates volatile and thermally stable compounds by their differential partition between a mobile gas phase and a stationary liquid or solid phase within a fused-silica capillary column (typically 30m x 0.25mm x 0.25 micron film). The electron ionization (EI) MS detector produces characteristic fragmentation patterns matchable against NIST, Wiley, or in-house spectral libraries. Essential for ethanol (headspace GC-FID), volatile organic compounds, many drugs of abuse, and pesticides. Selected ion monitoring (SIM) mode provides enhanced sensitivity for target analytes by monitoring only a few diagnostic ions.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">LOD: low picogram</span><span class="spec-pill">EI ionization</span><span class="spec-pill">NIST library match</span><span class="spec-pill">Headspace variant</span><span class="spec-pill">SIM mode</span>
+      </div>
+    </div>
+    <div class="equip-item">
+      <div class="equip-cat">Chromatography — Tandem Mass Spectrometry</div>
+      <div class="equip-name">Liquid Chromatograph-Tandem MS (LC-MS/MS)</div>
+      <p class="equip-body">The modern workhorse of forensic toxicology, particularly for thermolabile, polar, and high-molecular-weight compounds incompatible with GC without derivatization. Electrospray ionization (ESI) or atmospheric pressure chemical ionization (APCI) interfaces allow liquid-phase analytes to transition to gas-phase ions. Multiple reaction monitoring (MRM) mode in triple-quadrupole instruments targets specific precursor-to-product ion transitions, enabling simultaneous quantitation of 50 or more analytes in a single injection with exquisite selectivity. The instrument of choice for opioids, benzodiazepines, fentanyl analogues, novel psychoactive substances, and biological toxins.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">ESI/APCI ionization</span><span class="spec-pill">MRM transitions</span><span class="spec-pill">LOD: femtogram</span><span class="spec-pill">No derivatization needed</span><span class="spec-pill">50+ compounds/run</span>
+      </div>
+    </div>
+    <div class="equip-item">
+      <div class="equip-cat">High-Resolution Mass Spectrometry</div>
+      <div class="equip-name">Quadrupole Time-of-Flight HRMS (QTOF)</div>
+      <p class="equip-body">Next-generation instrument enabling exact mass measurement with less than 5 ppm mass accuracy and molecular formula determination from a single acquisition. QTOF acquires full-scan data retrospectively — unlike targeted MRM methods, unknown compounds can be identified from archived data files without requiring re-analysis of the original specimen. Critical for novel psychoactive substance (NPS) identification, metabolite elucidation, and untargeted forensic screening workflows. Spectral databases such as mzCloud, Wiley High Resolution, and METLIN enable rapid dereplication against tens of thousands of compounds. Data-independent acquisition (DIA) modes provide both quantitative accuracy and qualitative confirmation simultaneously.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">&lt;5 ppm mass accuracy</span><span class="spec-pill">Full-scan retrospective</span><span class="spec-pill">NPS identification</span><span class="spec-pill">mzCloud database</span><span class="spec-pill">Exact molecular formula</span>
+      </div>
+    </div>
+    <div class="equip-item">
+      <div class="equip-cat">Automated Immunoassay</div>
+      <div class="equip-name">Automated Clinical Immunoassay Analyzer</div>
+      <p class="equip-body">Automated analyzers perform competitive enzyme-linked immunosorbent assays (ELISA) or chemiluminescent immunoassays (CLIA) at high throughput for presumptive drug class screening. Antibody-antigen interactions detect drug classes rather than individual compounds — cross-reactivity with structurally related molecules means positive results always require confirmatory mass spectrometric testing before legal reporting. CLIA analyzers process 300 to 500 specimens per hour with minimal operator intervention. Point-of-care lateral flow immunoassay strips provide rapid field screening in roadside, emergency department, and correctional settings.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">300+ samples/hour</span><span class="spec-pill">Presumptive screening only</span><span class="spec-pill">CLIA/ELISA platforms</span><span class="spec-pill">Cutoff-based reporting</span><span class="spec-pill">Class-specific antibodies</span>
+      </div>
+    </div>
+    <div class="equip-item">
+      <div class="equip-cat">Elemental Analysis</div>
+      <div class="equip-name">Inductively Coupled Plasma-Mass Spectrometry (ICP-MS)</div>
+      <p class="equip-body">The definitive instrument for multi-element analysis in forensic toxicology. An argon plasma at approximately 6,000 to 8,000 degrees Celsius atomizes and ionizes all elements in the sample matrix; the mass spectrometer separates ions by mass-to-charge ratio enabling simultaneous quantification of more than 70 elements at part-per-trillion sensitivity from a single 1 mL injection. Critical for arsenic speciation (distinguishing toxic inorganic arsenite and arsenate from less toxic organic dimethylarsinic acid), lead isotope ratio forensics for source attribution, and comprehensive heavy metal panels in suspected poisoning, occupational exposure, and environmental contamination cases.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">ppt sensitivity</span><span class="spec-pill">70+ elements simultaneous</span><span class="spec-pill">Arsenic speciation</span><span class="spec-pill">Pb isotope ratios</span><span class="spec-pill">Hair segment analysis</span>
+      </div>
+    </div>
+    <div class="equip-item">
+      <div class="equip-cat">Sample Preparation Automation</div>
+      <div class="equip-name">Solid Phase Extraction (SPE) Workstation</div>
+      <p class="equip-body">Biological matrices contain complex mixtures of proteins, phospholipids, salts, and endogenous compounds that suppress ionization and foul chromatographic columns. Solid phase extraction on automated workstations (Hamilton STAR, Tecan, Caliper) processes 96 or 384 specimens simultaneously using mixed-mode cation exchange (MCX), C18 reverse-phase, or immunoaffinity sorbents. Deuterium-labeled or carbon-13 stable isotope internal standards are added at extraction onset to track and correct for all procedural losses and matrix effects. Phospholipid removal plates prevent lipid-related ion suppression — a critical quality consideration for blood matrix analysis by LC-MS/MS.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">96/384-well format</span><span class="spec-pill">MCX/C18 sorbents</span><span class="spec-pill">Isotope-labeled ISTD</span><span class="spec-pill">Matrix effect correction</span><span class="spec-pill">Phospholipid removal</span>
+      </div>
+    </div>
+    <div class="equip-item">
+      <div class="equip-cat">Breath Alcohol Analysis</div>
+      <div class="equip-name">Evidential Breath Alcohol Analyzer (EBA)</div>
+      <p class="equip-body">Instruments such as the Intoxilyzer 9000, Draeger Alcotest 9510, and DataMaster DMT use dual-wavelength infrared spectroscopy or electrochemical fuel cell technology to measure ethanol in deep-lung alveolar air. A blood-to-breath partition ratio of 2,100:1 converts breath alcohol concentration (BrAC) to estimated blood alcohol concentration (BAC). These instruments require type-approval, periodic calibration with NIST-certified reference solutions, and operation by certified technicians. Rigorous simulator validation, mouth alcohol detection periods, and interferent rejection are mandatory quality assurance safeguards for results to withstand legal challenge.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">IR spectroscopy dual-wavelength</span><span class="spec-pill">2100:1 partition ratio</span><span class="spec-pill">NHTSA type-approved</span><span class="spec-pill">Duplicate sequential analysis</span><span class="spec-pill">Certified simulator calibration</span>
+      </div>
+    </div>
+    <div class="equip-item">
+      <div class="equip-cat">Nuclear Analytical Techniques</div>
+      <div class="equip-name">Neutron Activation Analysis (NAA)</div>
+      <p class="equip-body">NAA irradiates specimens with thermal neutrons in a nuclear reactor, inducing radioactivity in trace elements proportional to their initial concentration. Gamma-ray spectrometry then identifies and quantifies activated elements with extreme sensitivity (sub-nanogram per gram) and without chemical separation in many cases. NAA is particularly powerful for arsenic, selenium, mercury, and antimony determination in hair and tissue. Its non-destructive nature (in instrumental NAA) preserves specimens. Historically significant in the Napoleon Bonaparte hair analysis and verification of the Charles Francis Hall Arctic explorer exhumation case. Now largely supplemented by ICP-MS in routine forensic work but remains reference method.</p>
+      <div class="equip-specs">
+        <span class="spec-pill">Sub-ng/g sensitivity</span><span class="spec-pill">Non-destructive variant</span><span class="spec-pill">Nuclear reactor required</span><span class="spec-pill">Historical cases gold std</span><span class="spec-pill">Gamma spectroscopy</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="section-label">Forensic Record</div>
+  <div class="section-title">Landmark Case Studies</div>
+  <p class="section-desc">Historical cases that defined methodologies, established legal precedents, and revealed previously unknown toxicological phenomena — collectively the evidence base upon which modern forensic toxicology practice is built.</p>
+  <div class="cases-grid">
+    <div class="case-card">
+      <div class="case-header">
+        <div class="case-number">01</div>
+        <div class="case-status status-landmark">Landmark Case</div>
+        <div class="case-title">Georgi Markov — The Umbrella Assassination</div>
+        <div class="case-meta">LONDON, UK — 1978 — Ricin Biological Weapon</div>
+      </div>
+      <div class="case-body">
+        <p>Bulgarian dissident Georgi Markov was fatally poisoned in London after being jabbed in the leg with a specially modified umbrella. The weapon injected a 1.7mm platinum-iridium pellet containing ricin into his calf. He died four days later after progressive systemic failure — fever, nausea, cardiovascular collapse, and bone marrow aplasia.</p>
+        <p>The forensic investigation was unprecedented. Standard toxicological screening found nothing. Only meticulous gross autopsy examination revealed the pellet — drilled with two 0.35mm holes that had been sealed with wax. Ricin was confirmed by cytotoxicity bioassay on material extracted from the pellet. The case drove international development of ricin immunoassay and mass spectrometric detection methods.</p>
+        <div class="case-findings">
+          <div class="cf-label">Toxicological and Forensic Findings</div>
+          <div class="cf-item">Ricin identified via cytotoxicity bioassay on pellet extract residue</div>
+          <div class="cf-item">Bone marrow necrosis and aplasia on histopathological examination</div>
+          <div class="cf-item">Massive neutrophilia: WBC above 33,000 per cubic millimeter</div>
+          <div class="cf-item">No antemortem detection feasible with 1978-era toxicology technology</div>
+          <div class="cf-item">Case directly drove development of modern ricin detection assays</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-header">
+        <div class="case-number">02</div>
+        <div class="case-status status-landmark">Historical Cold Case</div>
+        <div class="case-title">Napoleon Bonaparte — Chronic Arsenic Exposure</div>
+        <div class="case-meta">ST. HELENA — 1821 — Solved by Hair Analysis in 1960s</div>
+      </div>
+      <div class="case-body">
+        <p>Napoleon Bonaparte died in exile on St. Helena in 1821, officially attributed to gastric cancer. However, toxicological analysis of preserved hair samples — conducted in the 1960s and 1990s using neutron activation analysis and atomic absorption spectrometry — revealed arsenic concentrations 40 times above normal background levels throughout his exile-period hair samples.</p>
+        <p>Segmental analysis demonstrated chronically elevated arsenic during his exile years, with normal levels in childhood hair. The debate between deliberate poisoning and environmental exposure (Scheele's Green wallpaper pigment, a copper arsenite, converted by Aspergillus mold to volatile trimethylarsine in damp rooms) remains unresolved. The case established hair segmental analysis as a retrospective poisoning investigation methodology.</p>
+        <div class="case-findings">
+          <div class="cf-label">Toxicological Findings</div>
+          <div class="cf-item">Hair arsenic: 10 to 38 ppm (normal background: less than 1 ppm)</div>
+          <div class="cf-item">Confirmed by NAA, AAS, and ICP-MS in multiple independent laboratories</div>
+          <div class="cf-item">Segmental analysis showed years of chronically elevated exposure</div>
+          <div class="cf-item">St. Helena wallpaper confirmed to contain copper arsenite pigment</div>
+          <div class="cf-item">Established retrospective forensic toxicology as a legitimate discipline</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-header">
+        <div class="case-number">03</div>
+        <div class="case-status status-closed">Case Closed — Unsolved</div>
+        <div class="case-title">Chicago Tylenol Murders — Cyanide Tampering</div>
+        <div class="case-meta">CHICAGO, USA — 1982 — Potassium Cyanide Product Tampering</div>
+      </div>
+      <div class="case-body">
+        <p>Seven people in the Chicago metropolitan area died after ingesting Extra-Strength Tylenol capsules that had been laced with potassium cyanide. The perpetrator purchased bottles of Tylenol, replaced capsule contents with cyanide, and returned them to store shelves. Victims died within hours of ingestion. No perpetrator was ever convicted.</p>
+        <p>Toxicological findings at autopsy were characteristic of cyanide poisoning: cherry-red lividity, elevated blood cyanide above 3 mg/L, and rapid death consistent with cyanide kinetics. The case drove the enactment of the Federal Anti-Tampering Act and the FDA mandate requiring tamper-evident packaging for all over-the-counter medications — a permanent legacy in pharmaceutical safety regulation.</p>
+        <div class="case-findings">
+          <div class="cf-label">Toxicological Findings</div>
+          <div class="cf-item">Blood cyanide: 3.1 to 4.8 mg/L (lethal threshold: above 1 mg/L)</div>
+          <div class="cf-item">Cherry-red postmortem lividity universally present in all seven victims</div>
+          <div class="cf-item">Rapid death within minutes, consistent with cyanide kinetics</div>
+          <div class="cf-item">Microdiffusion Conway cell and GC-FID confirmed HCN in blood</div>
+          <div class="cf-item">Each capsule contained approximately 65 mg KCN — roughly 10,000 times lethal dose</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-header">
+        <div class="case-number">04</div>
+        <div class="case-status status-landmark">Nuclear Assassination — Landmark</div>
+        <div class="case-title">Alexander Litvinenko — Polonium-210 Poisoning</div>
+        <div class="case-meta">LONDON, UK — 2006 — Radioactive Isotope Assassination</div>
+      </div>
+      <div class="case-body">
+        <p>Former Russian FSB officer Alexander Litvinenko was fatally poisoned with polonium-210 (Po-210) — an alpha-emitting radioactive isotope — administered in his tea at the Millennium Hotel, London. He died 23 days later from acute radiation syndrome: bone marrow aplasia, hair loss, and multiorgan failure. The case is historically significant as the first confirmed use of a nuclear weapon for deliberate targeted assassination.</p>
+        <p>Standard clinical toxicological and microbiological investigations were entirely negative. Radiation sickness was only suspected clinically from the constellation of bone marrow suppression and hair loss. Po-210 was confirmed when urine and blood samples were analyzed by specialist nuclear laboratories using alpha-spectrometry and liquid scintillation counting. The trail of Po-210 contamination in hotel rooms, airplanes, and restaurants provided a forensic radiation fingerprint tracing the perpetrators.</p>
+        <div class="case-findings">
+          <div class="cf-label">Toxicological and Radiological Findings</div>
+          <div class="cf-item">Urine Po-210: grossly elevated confirmed by alpha-spectrometry</div>
+          <div class="cf-item">Acute radiation syndrome with fatal bone marrow aplasia</div>
+          <div class="cf-item">Standard clinical and forensic toxicology panels: entirely negative</div>
+          <div class="cf-item">Environmental contamination trail mapped by gamma-survey teams</div>
+          <div class="cf-item">Estimated ingested dose: approximately 4.4 GBq (lethality threshold: about 1 GBq)</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-header">
+        <div class="case-number">05</div>
+        <div class="case-status status-closed">Case Closed — Convicted</div>
+        <div class="case-title">Harold Shipman — Morphine Serial Murders</div>
+        <div class="case-meta">HYDE, UK — 1975 to 1998 — Iatrogenic Diamorphine Overdose</div>
+      </div>
+      <div class="case-body">
+        <p>British general practitioner Harold Shipman murdered an estimated 215 to 260 patients over 23 years by injecting lethal doses of diamorphine (heroin). He was convicted of 15 murders in 2000. The case prompted the largest forensic toxicological exhumation project in British history — posthumous analysis of preserved tissues and segmented hair from multiple victims exhumed from cemeteries across Greater Manchester.</p>
+        <p>Morphine and its metabolite 6-monoacetylmorphine (6-MAM, the heroin-specific metabolite) were detected in exhumed liver tissue and hair by GC-MS and LC-MS/MS at concentrations consistent with acute iatrogenic overdose. Hair segmental analysis demonstrated single acute administration rather than therapeutic chronic dosing. The Shipman Inquiry drove fundamental reforms to death certification, cremation authorization procedures, and controlled drug prescribing accountability in the United Kingdom.</p>
+        <div class="case-findings">
+          <div class="cf-label">Toxicological Findings</div>
+          <div class="cf-item">Morphine detected in embalmed and exhumed liver and muscle tissue</div>
+          <div class="cf-item">6-MAM (heroin-specific metabolite) confirmed in hair terminal segments</div>
+          <div class="cf-item">Concentrations: 10 to 100 times above therapeutic morphine reference ranges</div>
+          <div class="cf-item">GC-MS confirmation with deuterated morphine and 6-MAM internal standards</div>
+          <div class="cf-item">Segmental hair pattern consistent with single acute administration episode</div>
+        </div>
+      </div>
+    </div>
+    <div class="case-card">
+      <div class="case-header">
+        <div class="case-number">06</div>
+        <div class="case-status status-cold">Cold Case Solved</div>
+        <div class="case-title">Charles Francis Hall — Arctic Explorer Poisoning</div>
+        <div class="case-meta">ARCTIC EXPEDITION — 1871 — Solved by Exhumation in 1968</div>
+      </div>
+      <div class="case-body">
+        <p>Arctic explorer Charles Francis Hall died in 1871 during his third polar expedition. Nearly a century later, in 1968, forensic anthropologist Chauncey Loomis exhumed Hall's remarkably preserved body from the permafrost of northwestern Greenland. Hair and nail samples were analyzed using neutron activation analysis — the most sensitive elemental technique available at the time.</p>
+        <p>Results showed arsenic concentrations 76 times above normal background levels in the terminal hair segment — corresponding to the final weeks of life — consistent with acute arsenic poisoning. The permafrost had preserved both the body and the toxicological evidence across 97 years. The case demonstrated the extraordinary longevity of forensic chemical evidence under optimal preservation conditions and remains a landmark in retrospective historical forensic toxicology.</p>
+        <div class="case-findings">
+          <div class="cf-label">Toxicological Findings</div>
+          <div class="cf-item">Terminal hair segment arsenic: 76.7 ppm (normal background: less than 1 ppm)</div>
+          <div class="cf-item">Neutron activation analysis performed at University of Toronto reactor</div>
+          <div class="cf-item">97-year-old permafrost-preserved specimen yielded valid quantitative results</div>
+          <div class="cf-item">Permafrost prevented biological degradation of tissue and hair keratin</div>
+          <div class="cf-item">Established permafrost preservation and retrospective historical toxicology</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="methods">
+  <div class="section-label">Laboratory Workflow</div>
+  <div class="section-title">Analytical Methods and Chain of Custody</div>
+  <p class="section-desc">From specimen collection at the crime scene to expert witness testimony in court — the forensic toxicology workflow is governed by meticulous quality assurance protocols ensuring scientific validity and legal defensibility at every step.</p>
+  <div class="methods-grid" style="margin-bottom:4rem;">
+    <div class="method-card">
+      <div class="method-step">01</div>
+      <div class="method-title">Specimen Collection and Preservation</div>
+      <p class="method-body">Biological specimens are collected with strict attention to container type, preservative chemistry, volume, and temperature. Blood requires sodium fluoride and potassium oxalate (gray-top tubes) to inhibit enzymatic degradation and neo-formation of ethanol. Liver (minimum 50g), brain, vitreous humor, hair (proximal 3 cm from scalp), and gastric contents constitute the standard postmortem toxicological panel. All containers are immediately labeled with case number, specimen type, anatomical collection site, collector identity, date and time, and sealed with tamper-evident evidence tape before transfer into a secured chain-of-custody evidence bag.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-step">02</div>
+      <div class="method-title">Presumptive Immunoassay Screening</div>
+      <p class="method-body">Immunoassay screening panels detect broad drug classes in urine or blood using competitive antibody-antigen binding reactions. Typical panels screen for opiates, cocaine metabolites, amphetamines, cannabinoids (THC-COOH), benzodiazepines, phencyclidine, barbiturates, and ethanol. Results are reported as screen-positive or screen-negative relative to established cutoff concentrations. A positive screen triggers mandatory confirmation testing; a negative screen does not exclude substances outside the assay's coverage window. Colorimetric spot tests (Marquis for amphetamines, Scott for cocaine) provide additional presumptive identification of seized substances at field level before laboratory analysis.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-step">03</div>
+      <div class="method-title">Confirmatory Quantitative Analysis</div>
+      <p class="method-body">All medicolegally significant results require confirmation by an orthogonal chromatographic-mass spectrometric method — typically GC-MS or LC-MS/MS with a stable isotope-labeled internal standard. Method validation per SWGTOX, SOFT/AAFS, or ISO 17025 guidelines demonstrates linearity, precision, accuracy, limit of detection, limit of quantitation, matrix effects, carry-over, and analyte stability. Calibrators and quality control samples at low, medium, and high concentrations are analyzed with every analytical run. The confirmation method must unequivocally identify the compound (by retention time plus two or more diagnostic ion transitions or a spectral library match above threshold) AND quantify it accurately using a stable isotope-labeled internal standard. Only confirmed quantified results are reported for legal purposes.</p>
+    </div>
+    <div class="method-card">
+      <div class="method-step">04</div>
+      <div class="method-title">Scientific Interpretation</div>
+      <p class="method-body">Quantitative concentrations are interpreted in the full context of: published therapeutic, toxic, and lethal reference ranges from peer-reviewed literature; individual tolerance, pharmacogenomics, and chronic exposure history; post-mortem redistribution magnitude specific to each analyte; specimen-specific factors (matrix, preservation, decomposition state); and all available investigative circumstances — medical and prescription history, scene investigation findings, witness and family statements, and complete autopsy findings. Poly-drug synergism — where combinations of CNS depressants produce fatality at individually sublethal concentrations — must be explicitly evaluated and clearly communicated in all drug death case reports.</p>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-bottom:2rem;">Legal Framework and Quality Governance</div>
+  <div class="chain-flow">
+    <div class="chain-step">
+      <div class="chain-num-wrap"><div class="chain-num">A</div><div class="chain-line"></div></div>
+      <div class="chain-content">
+        <h4>Chain of Custody Documentation</h4>
+        <p>Every specimen transfer — from the autopsy suite to the laboratory receiving desk, through analytical processing, to long-term secure storage, and ultimately to court — must be documented with the receiver's printed name, signature, date and time, and the condition of the specimen upon receipt. Any undocumented break in chain of custody provides defense counsel with legitimate grounds to challenge the evidentiary admissibility of toxicological results. Laboratory Information Management Systems (LIMS) provide electronic audit trails meeting ISO 17025 accreditation requirements. Specimens must be stored in secured, access-controlled, alarmed refrigerators and freezers with continuous temperature monitoring logs retained throughout the specimen's evidentiary life.</p>
+      </div>
+    </div>
+    <div class="chain-step">
+      <div class="chain-num-wrap"><div class="chain-num">B</div><div class="chain-line"></div></div>
+      <div class="chain-content">
+        <h4>Quality Assurance and Accreditation</h4>
+        <p>Forensic toxicology laboratories must operate under ISO/IEC 17025 accreditation, ASCLD/LAB accreditation in the United States, or nationally equivalent quality management standards. Internal quality assurance requires daily reagent blank analysis, calibration curve verification, and quality control sample analysis at a minimum of three concentration levels (low, medium, high QC) with every analytical run. External quality assurance involves blind proficiency testing programs — laboratories receive unknown specimens and must correctly identify and quantify their contents to maintain accreditation. All analytical methods require documented formal validation before implementation for casework. Analyst competency must be demonstrated through documented training records, witnessed casework review, and ongoing continuing professional education.</p>
+      </div>
+    </div>
+    <div class="chain-step">
+      <div class="chain-num-wrap"><div class="chain-num">C</div><div class="chain-line"></div></div>
+      <div class="chain-content">
+        <h4>Expert Witness Testimony</h4>
+        <p>Forensic toxicologists serve as expert witnesses, translating complex analytical science into comprehensible language for judges, juries, and counsel in both criminal and civil proceedings. Expert testimony admissibility is governed by the Frye standard (general acceptance in the relevant scientific community) in some US jurisdictions, or the Daubert standard (testability, peer review, known error rate, and general acceptance) in US federal courts and many states. The forensic toxicologist must clearly and consistently distinguish between objective factual findings and expert interpretive opinion, acknowledge the limitations and uncertainties of their analysis, and maintain objectivity regardless of the retaining party. Cross-examination typically challenges methodology validation, interpretation assumptions, alternative toxicological explanations, and the expert's qualifications and experience.</p>
+      </div>
+    </div>
+    <div class="chain-step">
+      <div class="chain-num-wrap"><div class="chain-num">D</div></div>
+      <div class="chain-content">
+        <h4>Reporting Standards (SWGTOX)</h4>
+        <p>Forensic toxicology reports must comply with Scientific Working Group for Forensic Toxicology (SWGTOX) reporting standards. Reports must include: complete case identifying information; a specimen list with collection sites, dates, and preservation details; method references with validation citations; individual analyte results with units, reference ranges, and interpretation; explicit statement of analysis limitations; and the analyst's credentials and signature. Measurement uncertainty of quantitative results must be reported per ISO Guide to Measurement Uncertainty (GUM) principles. All reports undergo mandatory technical and administrative review by a second qualified analyst before release. All raw data, calibration records, QC data, and instrument output underlying reported results must be retained per laboratory policy — typically a minimum of 10 years — and made available for defense expert review upon court order.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">Foren<span>Toxi</span></div>
+      <p class="footer-desc">The definitive reference platform for forensic toxicology — dedicated to advancing the scientific standards of medicolegal death investigation, analytical drug analysis, and toxicological interpretation worldwide.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Toxicology</h5>
+      <a href="#toxicology">Pharmacokinetics</a>
+      <a href="#toxicology">Pharmacodynamics</a>
+      <a href="#toxicology">Analytical Chemistry</a>
+      <a href="#toxicology">Neurotoxicology</a>
+      <a href="#toxicology">Immunotoxicology</a>
+    </div>
+    <div class="footer-col">
+      <h5>Reference</h5>
+      <a href="#poisons">Toxic Agents</a>
+      <a href="#organs">Organ Matrices</a>
+      <a href="#equipment">Instruments</a>
+      <a href="#cases">Case Studies</a>
+    </div>
+    <div class="footer-col">
+      <h5>Standards</h5>
+      <a href="#methods">SWGTOX Guidelines</a>
+      <a href="#methods">ISO 17025</a>
+      <a href="#methods">Chain of Custody</a>
+      <a href="#methods">Expert Testimony</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>Copyright 2025 ForenToxi — Forensic Toxicology Reference Platform</p>
+    <p>FOR EDUCATIONAL AND SCIENTIFIC REFERENCE PURPOSES ONLY</p>
+  </div>
+</footer>
+
+<script>
+  function showBranch(id, el) {
+    document.querySelectorAll('.branch-content').forEach(function(e) { e.classList.remove('active'); });
+    document.querySelectorAll('.branch-item').forEach(function(e) { e.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.overview-card, .poison-card, .organ-card, .equip-item, .case-card, .method-card').forEach(function(el) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
